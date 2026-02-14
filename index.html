@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>Samuel · neo‑brutalist · CTO level</title>
+  <!-- Font Awesome 6 (free) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Google Fonts Inter + Space Grotesk -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,500;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ===== RESET – WORLD‑CLASS COOL TONED NEO‑BRUTALISM ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Space Grotesk', sans-serif;
+      background-color: #d9e9f2;   /* soft arctic blue */
+      color: #13293D;
+      line-height: 1.5;
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* particle canvas – dynamic */
+    #physics-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+      opacity: 0.3;
+    }
+
+    /* neo‑brutalist cards */
+    .brutal-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 3px solid #163A5F;
+      box-shadow: 12px 12px 0 rgba(22, 58, 95, 0.25);
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s;
+    }
+    .brutal-card:hover {
+      transform: translate(-6px, -6px);
+      box-shadow: 18px 18px 0 rgba(22, 58, 95, 0.35);
+    }
+
+    .brutal-btn {
+      display: inline-block;
+      background: #A7C7E7;
+      border: 3px solid #13293D;
+      box-shadow: 6px 6px 0 #1F4E8C;
+      padding: 0.9rem 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #13293D;
+      text-decoration: none;
+      transition: 0.12s linear;
+      cursor: pointer;
+      font-size: 1rem;
+      border-radius: 0;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .brutal-btn i { margin-right: 8px; }
+    .brutal-btn:hover {
+      background: #163A5F;
+      color: #E6F0FA;
+      box-shadow: 10px 10px 0 #0B2A44;
+      border-color: #A7C7E7;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 5%;
+      position: relative;
+      z-index: 5;
+    }
+
+    h1, h2, h3 {
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    h2 {
+      font-size: clamp(2.3rem, 8vw, 4rem);
+      border-bottom: 5px solid #1F4E8C;
+      display: inline-block;
+      margin: 2.5rem 0 2rem;
+      padding-bottom: 0.3rem;
+    }
+    .section-tag {
+      background: #163A5F;
+      color: #D9E9F2;
+      padding: 0.2rem 1.2rem;
+      font-weight: 600;
+      border: 2px solid #13293D;
+      box-shadow: 4px 4px 0 #0B2A44;
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    /* ===== MOBILE‑FIRST NAV WITH HAMBURGER ===== */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 0;
+      flex-wrap: wrap;
+      position: relative;
+    }
+    .logo {
+      font-size: 2.2rem;
+      font-weight: 800;
+      background: #13293D;
+      color: #A7C7E7;
+      padding: 0.2rem 1rem;
+      border: 3px solid #1F4E8C;
+      box-shadow: 8px 8px 0 #3A6D9C;
+      z-index: 20;
+    }
+
+    /* hamburger icon – only visible on mobile */
+    .hamburger {
+      display: none;
+      font-size: 2.5rem;
+      cursor: pointer;
+      background: #13293D;
+      color: #A7C7E7;
+      padding: 0.2rem 1rem;
+      border: 3px solid #1F4E8C;
+      box-shadow: 6px 6px 0 #3A6D9C;
+      transition: 0.1s;
+      z-index: 25;
+    }
+    .hamburger:hover {
+      background: #1F4E8C;
+      color: #E6F0FA;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      transition: all 0.25s ease-in-out;
+    }
+    .nav-links a {
+      text-decoration: none;
+      color: #13293D;
+      font-weight: 600;
+      font-size: 1.2rem;
+      padding: 0.2rem 0;
+      border-bottom: 3px solid transparent;
+      transition: 0.1s;
+    }
+    .nav-links a i { margin-right: 5px; }
+    .nav-links a:hover {
+      border-bottom-color: #1F4E8C;
+      background: rgba(167, 199, 231, 0.3);
+    }
+
+    /* mobile styles */
+    @media (max-width: 768px) {
+      .hamburger {
+        display: inline-block;
+      }
+      .nav-links {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #d9e9f2;
+        flex-direction: column;
+        gap: 0;
+        border: 4px solid #13293D;
+        box-shadow: 12px 12px 0 #1F4E8C;
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        z-index: 30;
+        pointer-events: none;
+      }
+      .nav-links.open {
+        max-height: 500px;
+        opacity: 1;
+        padding: 1rem 0;
+        pointer-events: all;
+      }
+      .nav-links a {
+        display: block;
+        padding: 1rem 2rem;
+        border-bottom: 2px solid #163A5F;
+        font-size: 1.3rem;
+      }
+      .nav-links a:last-child { border-bottom: none; }
+    }
+
+    /* hero etc */
+    .hero-block { margin: 2rem 0 4rem; }
+    .name-double .line1 {
+      font-size: clamp(2.5rem, 10vw, 5rem);
+      font-weight: 800;
+      background: #163A5F;
+      color: #E6F0FA;
+      padding: 0.2rem 1.5rem;
+      border: 4px solid #0B2A44;
+      box-shadow: 12px 12px 0 #3A6D9C;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+    .name-double .line2 {
+      font-size: clamp(2rem, 8vw, 4.2rem);
+      font-weight: 800;
+      background: #BDD9F0;
+      color: #13293D;
+      padding: 0.2rem 1.5rem;
+      border: 4px solid #13293D;
+      box-shadow: 12px 12px 0 #163A5F;
+      display: inline-block;
+    }
+    .hero-sub { font-size: 1.8rem; font-weight: 600; margin: 2rem 0 1rem; }
+    .hero-para {
+      max-width: 800px;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(4px);
+      border: 3px solid #1F4E8C;
+      box-shadow: 10px 10px 0 #163A5F;
+      padding: 1.8rem;
+      font-size: 1.2rem;
+      font-weight: 500;
+    }
+
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin: 3rem 0;
+    }
+    @media (max-width:700px){ .grid-2col{ grid-template-columns:1fr; }}
+
+    /* about grid + me.jpg */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+    /* working image – now with me.jpg */
+    .working-img {
+      background: #ADC9E5;
+      border: 4px solid #13293D;
+      box-shadow: 16px 16px 0 #163A5F;
+      aspect-ratio: 1/0.9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .working-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: grayscale(20%) contrast(1.05);
+    }
+    @media (max-width:800px){ .about-grid{ grid-template-columns:1fr; }}
+
+    .contact-mini {
+      background: #C6DEF7;
+      border: 3px solid #163A5F;
+      box-shadow: 8px 8px 0 #1F4E8C;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .timeline-item {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(5px);
+      border: 3px solid #163A5F;
+      box-shadow: 10px 10px 0 #1F4E8C;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .timeline-year {
+      background: #163A5F; 
+      color: #E6F0FA;
+      width: fit-content;
+      padding: 0.3rem 1.5rem;
+      font-weight: 700;
+      border: 2px solid #0B2A44;
+    }
+    .skill-chips {
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: 0.8rem;
+      margin: 1rem 0 2rem;
+    }
+    .chip {
+      background: #C2DCF5;
+      border: 2.5px solid #13293D;
+      box-shadow: 5px 5px 0 #1F4E8C;
+      padding: 0.7rem 1.8rem;
+      font-weight: 600;
+      transition: 0.15s;
+    }
+    .chip i { margin-right: 8px; color: #163A5F; }
+    .chip:hover {
+      background: #163A5F;
+      color: #E6F0FA;
+      box-shadow: 8px 8px 0 #0B2A44;
+    }
+    .chip:hover i { color: #A7C7E7; }
+    .accomplishments {
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); 
+      gap: 1.8rem;
+      margin: 2rem 0;
+    }
+    .accomplish-card {
+      background: #BDD9F0;
+      border: 3px solid #13293D;
+      box-shadow: 8px 8px 0 #1F4E8C;
+      padding: 2rem 1rem;
+      text-align: center;
+    }
+    .accomplish-card i { font-size: 3rem; color: #163A5F; }
+    .project-grid {
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); 
+      gap: 2rem;
+    }
+    .project-card {
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(5px);
+      border: 3px solid #13293D;
+      box-shadow: 10px 10px 0 #1F4E8C;
+      padding: 2rem;
+    }
+    .project-tech { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1rem 0; }
+    .tech-badge {
+      background: #ADC9E5;
+      border: 2px solid #13293D;
+      padding: 0.2rem 1rem;
+      font-weight: 600;
+    }
+    .testimonials-grid {
+      display: grid; 
+      grid-template-columns: repeat(3,1fr); 
+      gap: 2rem;
+    }
+    @media (max-width:900px){ .testimonials-grid{ grid-template-columns:1fr; }}
+    .contact-row {
+      display: grid; 
+      grid-template-columns: 1fr 1fr; 
+      gap: 2rem;
+    }
+    .contact-info {
+      background: #C2DCF5;
+      border: 3px solid #13293D;
+      box-shadow: 10px 10px 0 #163A5F;
+      padding: 2rem;
+    }
+    .form-group { margin-bottom: 1.5rem; }
+    input, textarea {
+      width: 100%;
+      padding: 1rem;
+      border: 3px solid #13293D;
+      box-shadow: 6px 6px 0 #1F4E8C;
+      font-family: 'Inter', sans-serif;
+      background: rgba(255,255,255,0.9);
+    }
+    .footer {
+      border-top: 4px solid #163A5F;
+      margin-top: 4rem;
+      padding: 3rem 0 2rem;
+      display: flex; flex-wrap: wrap; justify-content: space-between;
+    }
+    .footer-links a { display: block; color: #13293D; font-weight: 600; text-decoration: none; margin: 0.3rem 0; }
+    .footer-links a i { margin-right: 8px; }
+    .subscribe-flex {
+      display: flex; 
+      gap: 0.5rem; 
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="physics-canvas"></canvas>
+
+  <div class="container">
+    <!-- navbar with hamburger (mobile) -->
+    <nav class="navbar">
+      <span class="logo"><i class="fas fa-code"></i> SAMUEL</span>
+      <div class="hamburger" id="hamburgerBtn"><i class="fas fa-bars"></i></div>
+      <div class="nav-links" id="navLinks">
+        <a href="#"><i class="fas fa-home"></i>Home</a>
+        <a href="#"><i class="fas fa-user"></i>About</a>
+        <a href="#"><i class="fas fa-cog"></i>Skills</a>
+        <a href="#"><i class="fas fa-project-diagram"></i>Projects</a>
+        <a href="#"><i class="fas fa-file-alt"></i>Resume</a>
+        <a href="#"><i class="fas fa-envelope"></i>Contact</a>
+      </div>
+    </nav>
+
+    <!-- hero -->
+    <div class="hero-block">
+      <div class="name-double">
+        <span class="line1"><i class="fas fa-angle-right"></i> Samuel Oluwabiyi</span>
+        <span class="line2"><i class="fas fa-angle-left"></i> Oluwatomisin</span>
+      </div>
+      <div class="hero-sub">Samuel Oluwabiyi Oluwatomisin</div>
+      <div class="hero-sub" style="font-size:2rem; margin-top:-0.2rem;"><i class="fas fa-mobile-alt"></i> Software Engineer & Creative Developer</div>
+      <p class="hero-para"><i class="fas fa-bolt" style="margin-right:10px;"></i>Building digital experiences that blend functionality with artistic flair. Specializing in mobile and web development with a passion for intuitive design.</p>
+      <div style="display:flex; gap:1.5rem; margin:2.5rem 0; flex-wrap:wrap;">
+        <a href="#" class="brutal-btn"><i class="fas fa-eye"></i> View My Work</a>
+        <a href="#" class="brutal-btn" style="background:#1F4E8C; color:#E6F0FA;"><i class="fas fa-paper-plane"></i> Contact Me</a>
+      </div>
+    </div>
+
+    <!-- summary -->
+    <div class="grid-2col">
+      <div class="brutal-card" style="padding:2rem;">
+        <span class="section-tag"><i class="fas fa-briefcase"></i> CAREER SUMMARY</span>
+        <p style="font-size:1.2rem;">With expertise in Flutter, Dart, and web technologies, I craft seamless digital experiences across platforms. My journey in software engineering blends technical precision with creative problem-solving.</p>
+      </div>
+      <div class="brutal-card" style="padding:2rem; background: rgba(189, 217, 240, 0.7);">
+        <span class="section-tag"><i class="fas fa-lightbulb"></i> MY PHILOSOPHY</span>
+        <p style="font-size:1.2rem;">Technology should be accessible, intuitive, and delightful. Every pixel and line of code should serve a purpose while creating moments of joy for the user.</p>
+      </div>
+    </div>
+
+    <!-- about me + me.jpg (working image) -->
+    <h2><i class="fas fa-user-astronaut"></i> About Me</h2>
+    <div class="about-grid">
+      <div>
+        <p class="brutal-card" style="padding:1.5rem;"><i class="fas fa-hand-peace"></i> Hello! I'm Samuel, a passionate software engineer with a knack for turning complex problems into simple, beautiful solutions. When I'm not coding, you can find me sketching app interfaces, contributing to open-source projects, or mentoring aspiring developers.</p>
+        <p class="brutal-card" style="padding:1.5rem;"><i class="fas fa-sitemap"></i> My approach to development is holistic—I care as much about the user experience as I do about the underlying architecture.</p>
+        <div class="contact-mini">
+          <p><i class="fas fa-map-pin"></i> From: Nigeria &nbsp;&nbsp; <i class="fas fa-clock"></i> Experience: 3+ years</p>
+          <p><i class="fas fa-envelope"></i> samueloluwabiyi68@gmail.com</p>
+        </div>
+      </div>
+      <!-- WORKING IMAGE: me.jpg with brutalist frame -->
+      <div class="working-img brutal-card">
+        <img src="me.jpg" alt="Samuel Oluwabiyi" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22400%22%20height%3D%22360%22%20viewBox%3D%220%200%20400%20360%22%3E%3Crect%20width%3D%22400%22%20height%3D%22360%22%20fill%3D%22%23163A5F%22%2F%3E%3Ctext%20x%3D%2250%22%20y%3D%22200%22%20font-family%3D%22Space%20Grotesk%22%20font-size%3D%2232%22%20fill%3D%22%23A7C7E7%22%3Eme.jpg%3C%2Ftext%3E%3C%2Fsvg%3E';">
+      </div>
+    </div>
+
+    <!-- resume timeline -->
+    <h2><i class="fas fa-timeline"></i> My Resume</h2>
+    <div class="timeline-item"><span class="timeline-year"><i class="fas fa-calendar"></i> 2021 - Present</span><h3>Senior Mobile Developer · Tech Innovations Inc.</h3><p>Lead developer for cross-platform mobile applications using Flutter.</p></div>
+    <div class="timeline-item"><span class="timeline-year"><i class="fas fa-calendar"></i> 2019 - 2021</span><h3>Full Stack Developer · Digital Solutions Agency</h3><p>Developed responsive web applications and RESTful APIs.</p></div>
+    <div class="timeline-item"><span class="timeline-year"><i class="fas fa-calendar"></i> 2017 - 2019</span><h3>Junior Developer · StartUp Ventures</h3><p>Built and maintained WordPress sites while learning modern web technologies.</p></div>
+    <div class="btn-download"><a href="#" class="brutal-btn"><i class="fas fa-download"></i> Download Full Resume</a></div>
+
+    <!-- skills -->
+    <h2><i class="fas fa-cogs"></i> Skills & Abilities</h2>
+    <div class="skill-group"><h3>Mobile</h3><div class="skill-chips"><span class="chip"><i class="fab fa-flutter"></i> Flutter</span><span class="chip"><i class="fab fa-dart"></i> Dart</span><span class="chip"><i class="fas fa-fire"></i> Firebase</span></div></div>
+    <div class="skill-group"><h3>Web</h3><div class="skill-chips"><span class="chip"><i class="fab fa-js"></i> JavaScript</span><span class="chip"><i class="fab fa-html5"></i> HTML/CSS</span><span class="chip"><i class="fab fa-react"></i> React</span></div></div>
+    <div class="skill-group"><h3>Tools</h3><div class="skill-chips"><span class="chip"><i class="fab fa-github"></i> Git/GitHub</span><span class="chip"><i class="fas fa-pencil-ruler"></i> UI/UX</span><span class="chip"><i class="fas fa-chart-line"></i> Agile</span></div></div>
+
+    <!-- accomplishments -->
+    <div class="accomplishments">
+      <div class="accomplish-card"><i class="fas fa-mobile-alt"></i><br><span style="font-size:2rem;">10+</span><br>Mobile Apps</div>
+      <div class="accomplish-card"><i class="fas fa-globe"></i><br><span style="font-size:2rem;">20+</span><br>Websites</div>
+      <div class="accomplish-card"><i class="fas fa-users"></i><br><span style="font-size:2rem;">15+</span><br>Mentored</div>
+      <div class="accomplish-card"><i class="fas fa-code-branch"></i><br><span style="font-size:2rem;">5+</span><br>Packages</div>
+    </div>
+
+    <!-- featured projects -->
+    <h2><i class="fas fa-star"></i> Featured Projects</h2>
+    <div class="project-grid">
+      <div class="project-card"><h3>HealthTrack <i class="fas fa-heartbeat"></i></h3><p>Fitness tracking</p><div class="project-tech"><span class="tech-badge"><i class="fab fa-flutter"></i> Flutter</span><span class="tech-badge"><i class="fas fa-database"></i> Firebase</span></div><a href="#" class="brutal-btn" style="padding:0.6rem 1.5rem;">View <i class="fas fa-arrow-right"></i></a></div>
+      <div class="project-card"><h3>EduLearn <i class="fas fa-graduation-cap"></i></h3><p>e-learning platform</p><div class="project-tech"><span class="tech-badge"><i class="fab fa-react"></i> React</span><span class="tech-badge"><i class="fab fa-node"></i> Node.js</span></div><a href="#" class="brutal-btn" style="padding:0.6rem 1.5rem;">View <i class="fas fa-arrow-right"></i></a></div>
+      <div class="project-card"><h3>TaskMaster <i class="fas fa-tasks"></i></h3><p>productivity suite</p><div class="project-tech"><span class="tech-badge"><i class="fab fa-flutter"></i> Flutter</span><span class="tech-badge"><i class="fas fa-fire"></i> Firestore</span></div><a href="#" class="brutal-btn" style="padding:0.6rem 1.5rem;">View <i class="fas fa-arrow-right"></i></a></div>
+    </div>
+
+    <!-- honors -->
+    <h2><i class="fas fa-award"></i> Honors & Awards</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+      <div class="brutal-card" style="padding:1.5rem;"><span class="section-tag">2022</span><h3>Best Mobile App</h3><p>Tech Innovation Summit</p></div>
+      <div class="brutal-card" style="padding:1.5rem;"><span class="section-tag">2021</span><h3>Open Source Contributor</h3><p>Flutter Community</p></div>
+    </div>
+
+    <!-- testimonials -->
+    <h2><i class="fas fa-comment-dots"></i> Testimonials</h2>
+    <div class="testimonials-grid">
+      <div class="brutal-card" style="padding:2rem;"><i class="fas fa-quote-left" style="font-size:2rem;"></i> Samuel's expertise transformed our mobile strategy. <br>— <strong>Jane Doe</strong></div>
+      <div class="brutal-card" style="padding:2rem;"><i class="fas fa-quote-left" style="font-size:2rem;"></i> Pixel‑perfect across all devices. <br>— <strong>John Smith</strong></div>
+      <div class="brutal-card" style="padding:2rem;"><i class="fas fa-quote-left" style="font-size:2rem;"></i> A rare ability to explain complex concepts simply. <br>— <strong>Alex Johnson</strong></div>
+    </div>
+
+    <!-- contact -->
+    <h2><i class="fas fa-address-card"></i> Get In Touch</h2>
+    <div class="contact-row">
+      <div class="contact-info">
+        <p><i class="fas fa-envelope"></i> samueloluwabiyi68@gmail.com</p>
+        <p><i class="fas fa-phone-alt"></i> +234 123 456 7890</p>
+        <p><i class="fas fa-map-marker-alt"></i> Lagos, Nigeria</p>
+        <div style="background:#163A5F; border:3px solid #13293D; padding:2rem; margin-top:1rem; color:#E6F0FA;"><i class="fas fa-map"></i> interactive map placeholder</div>
+      </div>
+      <div class="brutal-card" style="padding:2rem;">
+        <form id="dynamicForm" novalidate>
+          <div class="form-group"><input type="text" placeholder="Your Name" id="nameInput" required></div>
+          <div class="form-group"><input type="email" placeholder="Your Email" id="emailInput" required></div>
+          <div class="form-group"><input type="text" placeholder="Subject" id="subjectInput" required></div>
+          <div class="form-group"><textarea placeholder="Your Message" id="msgInput" required></textarea></div>
+          <button class="brutal-btn" type="submit" id="liveBtn"><i class="fas fa-paper-plane"></i> Send Message</button>
+          <p id="formFeedback" style="margin-top:1rem; font-weight:600;"></p>
+        </form>
+      </div>
+    </div>
+
+    <!-- footer -->
+    <footer class="footer">
+      <div><span style="font-size:2rem; font-weight:800;">SAMUEL</span><br><i class="fas fa-code"></i> Software Engineer</div>
+      <div class="footer-links"><strong>Quick</strong><a href="#"><i class="fas fa-chevron-right"></i>Home</a><a href="#"><i class="fas fa-chevron-right"></i>About</a><a href="#"><i class="fas fa-chevron-right"></i>Skills</a></div>
+      <div><strong>Stay Updated</strong><div class="subscribe-flex"><input type="email" placeholder="Your Email" id="subEmail"><button class="brutal-btn" id="subBtn"><i class="fab fa-telegram"></i> Subscribe</button></div><p id="subFeedback"></p></div>
+    </footer>
+    <div style="text-align:center; padding:2rem 0 1rem;">© 2026 Samuel Oluwabiyi Oluwatomisin. All rights reserved <i class="fas fa-copyright"></i></div>
+  </div>
+
+  <!-- JAVASCRIPT: physics + hamburger + flawless interactions -->
+  <script>
+    (function() {
+      // ---------- Physics canvas (unchanged but bulletproof) ----------
+      const canvas = document.getElementById('physics-canvas');
+      const ctx = canvas.getContext('2d');
+      let width, height;
+      let particles = [];
+      const PARTICLE_COUNT = 65;
+      const CONNECTION_DIST = 130;
+      const SPRING_STRENGTH = 0.002;
+      const MOUSE_RADIUS = 120;
+      let mouseX = null, mouseY = null;
+
+      function initParticles() {
+        particles = [];
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: (Math.random() - 0.5) * 0.5,
+          });
+        }
+      }
+
+      function resizeCanvas() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width;
+        canvas.height = height;
+        initParticles();
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      canvas.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+      });
+      canvas.addEventListener('mouseleave', () => { mouseX = null; mouseY = null; });
+
+      function updateParticles() {
+        for (let p of particles) {
+          if (mouseX !== null && mouseY !== null) {
+            let dx = mouseX - p.x;
+            let dy = mouseY - p.y;
+            let dist = Math.hypot(dx, dy);
+            if (dist < MOUSE_RADIUS) {
+              let force = (1 - dist / MOUSE_RADIUS) * 0.2;
+              p.vx += dx * force * 0.01;
+              p.vy += dy * force * 0.01;
+            }
+          }
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x < 0) { p.x = 0; p.vx *= -0.5; }
+          if (p.x > width) { p.x = width; p.vx *= -0.5; }
+          if (p.y < 0) { p.y = 0; p.vy *= -0.5; }
+          if (p.y > height) { p.y = height; p.vy *= -0.5; }
+
+          p.vx *= 0.99;
+          p.vy *= 0.99;
+        }
+
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            let a = particles[i], b = particles[j];
+            let dx = b.x - a.x;
+            let dy = b.y - a.y;
+            let dist = Math.hypot(dx, dy);
+            if (dist < CONNECTION_DIST) {
+              let force = (CONNECTION_DIST - dist) * SPRING_STRENGTH;
+              let normX = dx / (dist || 1);
+              let normY = dy / (dist || 1);
+              a.vx += normX * force * 0.5;
+              a.vy += normY * force * 0.5;
+              b.vx -= normX * force * 0.5;
+              b.vy -= normY * force * 0.5;
+            }
+          }
+        }
+      }
+
+      function drawParticles() {
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = '#d9e9f2';
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.strokeStyle = '#1F4E8C';
+        ctx.lineWidth = 0.8;
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            let a = particles[i], b = particles[j];
+            let dist = Math.hypot(b.x - a.x, b.y - a.y);
+            if (dist < CONNECTION_DIST) {
+              ctx.globalAlpha = 0.2 * (1 - dist / CONNECTION_DIST);
+              ctx.beginPath();
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(b.x, b.y);
+              ctx.stroke();
+            }
+          }
+        }
+        ctx.fillStyle = '#163A5F';
+        ctx.globalAlpha = 0.5;
+        for (let p of particles) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 3, 0, 2 * Math.PI);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1.0;
+      }
+
+      function animatePhysics() {
+        updateParticles();
+        drawParticles();
+        requestAnimationFrame(animatePhysics);
+      }
+      animatePhysics();
+
+      // ---------- HAMBURGER MENU (mobile) ----------
+      const hamburger = document.getElementById('hamburgerBtn');
+      const navLinks = document.getElementById('navLinks');
+      if (hamburger) {
+        hamburger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          navLinks.classList.toggle('open');
+          // optional aria / icon toggle
+          const icon = hamburger.querySelector('i');
+          if (navLinks.classList.contains('open')) {
+            icon.classList.remove('fa-bars');
+            icon.classList.add('fa-times');
+          } else {
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+          }
+        });
+
+        // close on any link click (smooth)
+        navLinks.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', () => {
+            navLinks.classList.remove('open');
+            const icon = hamburger.querySelector('i');
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+          });
+        });
+
+        // close on outside click (optional)
+        document.addEventListener('click', (e) => {
+          if (!navLinks.contains(e.target) && !hamburger.contains(e.target)) {
+            navLinks.classList.remove('open');
+            const icon = hamburger.querySelector('i');
+            if(icon) {
+              icon.classList.remove('fa-times');
+              icon.classList.add('fa-bars');
+            }
+          }
+        });
+      }
+
+      // ---------- form validation & UX perfection ----------
+      const nameInput = document.getElementById('nameInput');
+      const emailInput = document.getElementById('emailInput');
+      const subjectInput = document.getElementById('subjectInput');
+      const msgInput = document.getElementById('msgInput');
+      const liveBtn = document.getElementById('liveBtn');
+      const formFeedback = document.getElementById('formFeedback');
+      const dynamicForm = document.getElementById('dynamicForm');
+
+      function checkFormInputs() {
+        let nameOk = nameInput.value.trim() !== '';
+        let emailOk = emailInput.value.includes('@') && emailInput.value.includes('.');
+        let subjectOk = subjectInput.value.trim() !== '';
+        let msgOk = msgInput.value.trim() !== '';
+
+        if (nameOk && emailOk && subjectOk && msgOk) {
+          formFeedback.innerHTML = '<i class="fas fa-check-circle" style="color:#1F4E8C;"></i> All set — ready to send!';
+          liveBtn.style.background = '#A7C7E7';
+          return true;
+        } else {
+          formFeedback.innerHTML = '<i class="fas fa-exclamation-triangle" style="color:#b33;"></i> Please fill all fields (valid email)';
+          liveBtn.style.background = '#BDD9F0';
+          return false;
+        }
+      }
+
+      [nameInput, emailInput, subjectInput, msgInput].forEach(el => {
+        if (el) el.addEventListener('input', checkFormInputs);
+      });
+
+      if (dynamicForm) {
+        dynamicForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          if (checkFormInputs()) {
+            alert('✨ Message sent (demo) — world‑class feedback ✨');
+            // optional reset
+            dynamicForm.reset();
+            checkFormInputs(); // reset style
+          } else {
+            alert('❌ Please complete all fields correctly.');
+          }
+        });
+      }
+
+      // ---------- subscribe button ----------
+      const subBtn = document.getElementById('subBtn');
+      const subEmail = document.getElementById('subEmail');
+      const subFeedback = document.getElementById('subFeedback');
+      if (subBtn) {
+        subBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const email = subEmail.value.trim();
+          if (email.includes('@') && email.includes('.')) {
+            subFeedback.innerHTML = '<i class="fas fa-check" style="color:#1F4E8C;"></i> Subscribed! (demo)';
+            subEmail.value = '';
+          } else {
+            subFeedback.innerHTML = '<i class="fas fa-times" style="color:#b33;"></i> valid email required';
+          }
+        });
+      }
+
+      // ---------- download resume simulation ----------
+      document.querySelectorAll('.btn-download a, .brutal-btn').forEach(btn => {
+        if (btn.classList.contains('btn-download') || btn.innerText.includes('Download Full Resume')) {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('📄 Resume download simulation — CTO ready.');
+          });
+        }
+      });
+
+      // project view buttons / contact buttons smooth
+      document.querySelectorAll('.project-card .brutal-btn, .hero-block .brutal-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => { e.preventDefault(); alert('🔍 Navigation demo — smooth workflow.'); });
+      });
+
+      // ensure me.jpg error fallback is already inline
+
+      console.log('👔 CTO‑level: fully responsive, hamburger, me.jpg, bulletproof JS');
+    })();
+  </script>
+</body>
+</html>
